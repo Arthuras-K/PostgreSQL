@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS genre_mus (
 CREATE TABLE IF NOT EXISTS album (
   ID SERIAL PRIMARY KEY,
   name VARCHAR(60),
-  release_date DATE
+  release_date NUMERIC(4)
 );
 
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS album_mus (
 CREATE TABLE IF NOT EXISTS track (
   ID SERIAL PRIMARY KEY,
   name VARCHAR(60),
-  time TIME(2),
+  time NUMERIC(6, 2), 
   album_id INTEGER NOT NULL REFERENCES album(id)
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS track (
 CREATE TABLE IF NOT EXISTS collection (
   ID SERIAL PRIMARY KEY,
   name VARCHAR(60),
-  release_date DATE
+  release_date NUMERIC(4)
 );
 
 
