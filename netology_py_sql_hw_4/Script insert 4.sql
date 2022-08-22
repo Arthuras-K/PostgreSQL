@@ -41,21 +41,21 @@ VALUES (1, 1, 1), (2, 2, 2), (3, 3, 3),
 
 
 INSERT INTO track (id, name, time, album_id)
-VALUES (1, 'Good Riddance', 2.34, 1), (2, 'Walking Alone', 2.45, 1), 
-       (3, 'Gotta Get Away', 3.52, 2),
-       (4, 'Это пройдёт', 3.56, 3), (5, 'Дядя Володя', 4.17, 3),(6, 'Нас догонит любовь', 3.47, 3),
-       (7, 'Burn It', 3.51, 4), (8, 'One of Us', 3.24, 4),
-       (9, 'In the End', 3.36, 5), (10, 'Crawling', 3.29, 5), (11, 'One Step Closer', 2.36, 5), (12, 'Papercut', 3.05, 5),
-       (13, 'Вся вера и любовь этого мира', 4.09, 6), (14, 'Дотянуться до звезды', 3.07, 6),
-       (15, 'My Friends', 4.02, 7),
-       (16, 'Семь миллиардов', 2.55, 8), (17, 'Не учи меня как жить', 2.05, 8),
-       (18, 'White America', 5.24, 9), (19, 'Cleanin Out My Closet', 4.58, 9), (20, 'Without Me', 4.50, 9), (21, 'Sing for the Moment', 5.39, 9),
-       (22, 'Like Toy Soldiers', 4.57, 10), (23, 'Mosh', 5.18, 10),
-       (24, 'Back Home Again in Indiana', 5.31, 11), (25, 'Baby, It''s Cold Outside', 5.42, 11), (26, 'Way Down Yonder in New Orleans', 5.42, 11),
-       (27, 'Кольщик', 4.47, 12), (28, 'Фраер', 2.56, 12),
-       (29, 'А он успел', 3.36, 13),
-       (30, 'Blue Suede Shoes', 2.00, 14), (31, 'I Got a Woman', 2.25, 14),
-       (32, 'Flaming Star', 2.00, 15);
+VALUES (1, 'Good Riddance', 154, 1), (2, 'Walking Alone', 165, 1), 
+       (3, 'Gotta Get Away', 232, 2),
+       (4, 'Это пройдёт', 236, 3), (5, 'Дядя Володя', 257, 3),(6, 'Нас догонит любовь', 227, 3),
+       (7, 'Burn It', 231, 4), (8, 'One of Us', 204, 4),
+       (9, 'In the End', 216, 5), (10, 'Crawling', 209, 5), (11, 'One Step Closer', 156, 5), (12, 'Papercut', 185, 5),
+       (13, 'Вся вера и любовь этого мира', 249, 6), (14, 'Дотянуться до звезды', 187, 6),
+       (15, 'My Friends', 242, 7),
+       (16, 'Семь миллиардов', 175, 8), (17, 'Не учи меня как жить', 125, 8),
+       (18, 'White America', 324, 9), (19, 'Cleanin Out My Closet', 298, 9), (20, 'Without Me', 290, 9), (21, 'Sing for the Moment', 339, 9),
+       (22, 'Like Toy Soldiers', 297, 10), (23, 'Mosh', 318, 10),
+       (24, 'Back Home Again in Indiana', 331, 11), (25, 'Baby, It''s Cold Outside', 342, 11), (26, 'Way Down Yonder in New Orleans', 342, 11),
+       (27, 'Кольщик', 287, 12), (28, 'Фраер', 176, 12),
+       (29, 'А он успел', 216, 13),
+       (30, 'Blue Suede Shoes', 120, 14), (31, 'I Got a Woman', 145, 14),
+       (32, 'Flaming Star', 120, 15);
 
 
 INSERT INTO collection (id, name, release_date)
