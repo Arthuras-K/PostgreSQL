@@ -20,10 +20,15 @@ if __name__ == '__main__':
         print(db.create_table('phone_num')) 
 
         # Добавить новую запись. Обязательно имя, фамилию, емейл и по желанию номер телефона
-        print(db.add_client('кaкa', 'енего', 'ooop@yandex.ru', +7901237))        
+        print(db.add_client(first_name = 'кaкa',last_name = 'енего', email = 'paip@yandex.ru', number = +7999557777))        
 
         # Добавить номер телефон к существующему клиенту по его id или емейлу
-        print(db.add_phone_num(number = +79557, id = 3, email = 'pap@yandex.ru'))         
+        print(db.add_phone_num(number = +79975487, id = 3, email = None))         
 
-  
+        # Изменить данные клиента по его id или емейлу
+        data = {
+        'id': 3, 'email': 'paip@yandex.ru', 'first_name': None, 'last_name': None, 'numb': None   
+        }
+        print(db.change_client(**data))       
+
     conn.close()

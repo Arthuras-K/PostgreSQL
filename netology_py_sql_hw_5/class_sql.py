@@ -28,7 +28,7 @@ class db_client:
 
     # Форматирование значений допустимо через оператор %s, а вот форматирование имен таблиц, столбцов возможно только через конструкцию format(Identifier('_'))
     def create_table(self, name: str) -> str:
-        'Метод create_table создает таблицы из заготовок с именем "client" или "phone_num"'
+        'Этот метод создает таблицы из заготовок с именем "client" или "phone_num"'
         with self.connect.cursor() as cur:
             if name == 'client':   
                 # cur.execute - метод для написания запросов с помощью cur(курсор)                            
@@ -53,12 +53,13 @@ class db_client:
                 """)
                 self.connect.commit()
                 return f'Создана таблица {name} с полями id, number, client_id'
-
-            return 'Ошибка! Таблица не создана, нет заготовки с таким именем. Возможные имена "client", "phone_num".'
+            
+            else:
+                return 'Ошибка! Таблица не создана, нет заготовки с таким именем. Возможные имена "client", "phone_num"'
 
 
     def add_client(self, first_name: str, last_name: str, email: str, number: int = None)-> str:
-        'Метод add_client добавляет нового клиента'        
+        'Добавляет нового клиента'        
         with self.connect.cursor() as cur: 
 
             flag = self.check_absence(email = email, number = number)
@@ -67,7 +68,8 @@ class db_client:
                 # Форматирование запросов через оператор % и кортеж (f - строки не подходят, возможен вредоносный код)                             
                 cur.execute("""
                 INSERT INTO client(first_name, last_name, email) 
-                VALUES(%s, %s, %s) RETURNING id;                     
+                VALUES(%s, %s, %s) 
+                RETURNING id;                     
                 """, (first_name.capitalize(), last_name.capitalize(), email))
 
                 if number != None:
@@ -79,7 +81,6 @@ class db_client:
                     """, (number, client_id))
 
                 self.connect.commit()
-
                 return f'Клиент {first_name.capitalize()} добавлен(a)'
 
             else:
@@ -87,44 +88,70 @@ class db_client:
 
 
     def add_phone_num(self, number: int, id: int  = None, email: str = None)-> str:
-        'Метод add_phone_num добавляет номер телефона к существующему клиенту'
+        'Добавляет номер телефона к существующему клиенту'
         flag = self.check_absence(number = number)
-        
+      
         if flag:   
-            with self.connect.cursor() as cur:  
+            with self.connect.cursor() as cur:
+                flag_id = self.check_absence(id = id)
+                flag_email = self.check_absence(email = email)
 
-                flag_id = not self.check_absence(id = id)
-                flag_email = not self.check_absence(email = email)
+                if flag_id and flag_email:
+                    return 'Ошибка! Такого id или емейла нет в базе'   
 
-                if flag_id:
+                elif email and id == None:                
                     cur.execute("""
-                    INSERT INTO phone_num(number, client_id) 
-                    VALUES (%s, %s) RETURNING id;                
-                    """, (number, id))
+                    SELECT id FROM client 
+                    WHERE email = %s;                
+                    """, (email, ))
+                    id = cur.fetchone()
 
-                    return f'Клиенту с id={id} успешно добавлен номер телефона' 
+                cur.execute("""
+                INSERT INTO phone_num(number, client_id) 
+                VALUES (%s, %s);                
+                """, (number, id))
 
-                elif flag_email:
-
-                    return f'Клиенту с емейл={email} успешно добавлен номер телефона'                    
-
-                else:
-                    return 'Ошибка! Такого id или емейла нет в базе'                
+                self.connect.commit()                 
+                return f'Номер телефона добавлен'     
         else:
             return 'Ошибка! Этот номер уже есть в базе'   
 
 
-        
 
+    def change_client(self, **data)-> str:
+        'Меняет данные клиента'
+        with self.connect.cursor() as cur:
+            for key, value in data.items():
+                if key == "id":
+                    id = value
 
-    # Изменить данные о клиенте
-    def change_client(self ):
-        with self.connect.cursor() as cur:                    
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS name=%s(
-                id SERIAL PRIMARY KEY             
-            """, (name,))
-            conn.commit()
+                elif key == "email":
+                    email = value                    
+
+            flag_id = self.check_absence(id = id)
+            flag_email = self.check_absence(email = email)
+
+            print('id=',flag_id,'email=',flag_email)
+
+            if flag_id and flag_email:
+                return 'Ошибка! Такого id или емейла нет в базе'   
+
+            elif email and id == None:                
+                cur.execute("""
+                SELECT id FROM client 
+                WHERE email = %s;                
+                """, (email, ))
+                id = cur.fetchone()
+
+            for key, value in data.items():
+                if value != None:
+                    cur.execute("""
+                    UPDATE client SET %s = %s WHERE id=%s;
+                    """, (key, value, id))
+
+            self.connect.commit()                 
+            return f'Данные изменены'     
+
 
 
     # Удалить номер телефона
