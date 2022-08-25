@@ -89,8 +89,8 @@ class db_client:
     def add_phone_num(self, number: int, id: int  = None, email: str = None)-> str:
         'Метод add_phone_num добавляет номер телефона к существующему клиенту'
         flag = self.check_absence(number = number)
+        
         if flag:   
-
             with self.connect.cursor() as cur:  
 
                 flag_id = not self.check_absence(id = id)
@@ -105,10 +105,11 @@ class db_client:
                     return f'Клиенту с id={id} успешно добавлен номер телефона' 
 
                 elif flag_email:
+
                     return f'Клиенту с емейл={email} успешно добавлен номер телефона'                    
 
                 else:
-                    return 'Добавили по емейлу'                
+                    return 'Ошибка! Такого id или емейла нет в базе'                
         else:
             return 'Ошибка! Этот номер уже есть в базе'   
 
