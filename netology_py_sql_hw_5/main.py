@@ -4,11 +4,10 @@ import class_sql as sql
 import yaml
 
 
-
 if __name__ == '__main__':  
     with open('config.yaml') as f:
         config = yaml.safe_load(f)
-        PASSWORD_SQL = config['password_sql'] # Токен от ВК с доступом к фото
+        PASSWORD_SQL = config['password_sql'] 
 
 
     # Создается подключение к БД с помощью метода connect(). database - имя БД, user - имя при регистрации в postgress, password - пароль от user
@@ -27,16 +26,4 @@ if __name__ == '__main__':
         print(db.add_phone_num(number = +79557, id = 3, email = 'pap@yandex.ru'))         
 
   
-
-
     conn.close()
-
-
-
-
-
-
-
-
-
-

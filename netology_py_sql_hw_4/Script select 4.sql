@@ -24,31 +24,30 @@ SELECT album.name, ROUND(AVG(time), 2) AS AVG_album_sec FROM track
 
 
 /* все исполнители, которые не выпустили альбомы в 2020 году */
-SELECT DISTINCT musician.name FROM album 
-       JOIN album_mus 
-       ON album.id = album_mus.album_id
-       JOIN musician 
-       ON album_mus.musician_id = musician.id
- WHERE release_date != 2020
+SELECT name FROM musician 
+ WHERE name NOT IN (SELECT DISTINCT musician.name 
+                      FROM album 
+				      JOIN album_mus 
+				        ON album.id = album_mus.album_id
+				      JOIN musician 
+				        ON album_mus.musician_id = musician.id
+				     WHERE release_date = 2020)
  ORDER BY musician.name;
-       
+      
 
 /* названия сборников, в которых присутствует конкретный исполнитель 'Fever 333' */
-SELECT DISTINCT collection.name FROM collection 
-       JOIN track_coll 
-       ON collection.id = track_coll.collection_id
+SELECT DISTINCT collection.name FROM album_mus 
+       JOIN musician 
+       ON musician.id = album_mus.musician_id
+       AND musician.name = 'Fever 333'
+       JOIN album 
+       ON album_mus.album_id = album.id       
        JOIN track 
-       ON track_coll.track_id = track.id
- WHERE track.name IN (
-       SELECT track.name FROM musician 
-              JOIN album_mus 
-              ON musician.id = album_mus.album_id 
-              AND musician.name = 'Fever 333'
-              JOIN album 
-              ON album_mus.album_id = album.id
-              JOIN track 
-              ON track.album_id = album.id);
-     
+       ON track.album_id = album.id     
+       JOIN track_coll 
+       ON track.id = track_coll.track_id
+       JOIN collection 
+       ON collection.id = track_coll.collection_id;     
       
       
 /* название альбомов, в которых присутствуют исполнители более 1 жанра */
@@ -57,25 +56,19 @@ SELECT album.name FROM musician
        ON musician.id = album_mus.album_id 
        JOIN album 
        ON album_mus.album_id = album.id
- WHERE musician.name IN (
-       SELECT musician.name FROM musician 
-              JOIN genre_mus 
-              ON musician.id = genre_mus.musician_id
-              JOIN genre 
-              ON genre_mus.genre_id = genre.id
-        GROUP BY musician.name
-       HAVING COUNT(genre.name) > 1); 
-      
+       JOIN genre_mus 
+       ON musician.id = genre_mus.musician_id       
+       JOIN genre 
+       ON genre_mus.genre_id = genre.id         
+ GROUP BY album.name
+HAVING COUNT(DISTINCT genre.name) > 1; 
+       
        
 /* наименование треков, которые не входят в сборники */
 SELECT track.name FROM track 
- WHERE track.name NOT IN (
-       SELECT DISTINCT track.name FROM track
-              JOIN track_coll 
-              ON track.id = track_coll.track_id
-              JOIN collection 
-              ON track_coll.collection_id = collection.id);
-
+       LEFT JOIN track_coll 
+       ON track.id = track_coll.track_id
+ WHERE track_id IS NULL;
 
 
 /* исполнителя(-ей), написавшего самый короткий по продолжительности трек (теоретически таких треков может быть несколько) */
@@ -90,8 +83,13 @@ SELECT DISTINCT musician.name, time AS time_sec FROM musician
 
 
 /* название альбомов, содержащих наименьшее количество треков */
-SELECT album.name, COUNT(*)  FROM album
+SELECT album.name AS "Альбом", COUNT(track.name) AS "Кол-во треков" FROM album
        JOIN track 
        ON track.album_id = album.id
  GROUP BY album.name
-HAVING COUNT(track) = (SELECT MIN(time) FROM track); 
+HAVING COUNT(track.name) = (SELECT COUNT(track) FROM album
+				                   JOIN track 
+				                   ON track.album_id = album.id
+				             GROUP BY album.name
+				             ORDER BY COUNT(track.name)
+				             LIMIT 1); 
