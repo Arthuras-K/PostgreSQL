@@ -1,4 +1,5 @@
 # Импорт модуля Psycopg2 для взаимодействовия с базой postgres
+from pickle import NONE
 import psycopg2
 
 
@@ -18,7 +19,7 @@ class db_client:
             cur.execute("""
             SELECT client.id, email, number 
               FROM client
-              JOIN phone_num 
+              FULL JOIN phone_num 
                 ON client.id = phone_num.client_id
              WHERE client.id = %s OR email = %s OR number = %s;
             """, (id, email, number))
@@ -112,77 +113,140 @@ class db_client:
                 """, (number, id))
 
                 self.connect.commit()                 
-                return f'Номер телефона добавлен'     
+                return 'Номер телефона добавлен'     
         else:
             return 'Ошибка! Этот номер уже есть в базе'   
 
 
 
-    def change_client(self, **data)-> str:
+    def change_client(self, id: int = None, email: str = None, 
+                    first_name: str = None, last_name: str = None, 
+                        number: int = None)-> str:
         'Меняет данные клиента'
-        with self.connect.cursor() as cur:
-            for key, value in data.items():
-                if key == "id":
-                    id = value
-
-                elif key == "email":
-                    email = value                    
+        with self.connect.cursor() as cur:               
 
             flag_id = self.check_absence(id = id)
             flag_email = self.check_absence(email = email)
 
-            print('id=',flag_id,'email=',flag_email)
+            if flag_id:
+                return 'Ошибка! Такого id нет в базе'   
+
+            elif not flag_email:
+                return 'Ошибка! Нельзя заменить емэйл на уже существующий'   
+
+            if email != None:
+                cur.execute("""
+                UPDATE client 
+                   SET email=%s 
+                 WHERE id=%s;
+                """, (email, id))
+
+            if first_name != None:
+                cur.execute("""
+                UPDATE client 
+                   SET first_name=%s 
+                 WHERE id=%s;
+                """, (first_name, id))
+
+            if last_name != None:
+                cur.execute("""
+                UPDATE client 
+                   SET last_name=%s 
+                 WHERE id=%s;
+                """, (last_name, id))
+
+            if number != None:
+                cur.execute("""
+                SELECT COUNT(*)
+                  FROM phone_num
+                 WHERE client_id=%s;
+                """, (id, ))
+
+                if cur.fetchall()[0][0] > 1:
+                    return f'Невозможно изменить номер т.к. у клиенат несколько номеров'                       
+
+                cur.execute("""
+                UPDATE phone_num 
+                   SET number=%s 
+                 WHERE client_id=%s;
+                """, (number, id))
+
+            self.connect.commit()                 
+            return f'Данные клиента id={id} изменены'     
+
+
+    def del_phone_num(self, number: int)-> str:
+        'Удаляет номер телефона у клиента'
+        flag = self.check_absence(number = number)
+        if not flag:   
+            with self.connect.cursor() as cur:
+
+                cur.execute("""
+                DELETE FROM phone_num 
+                 WHERE number=%s;
+                """, (number, ))
+
+                self.connect.commit()                 
+                return 'Номер телефона удален'     
+        else:
+            return 'Ошибка! Такого номера нет в базе'  
+
+
+    def del_client(self,  id: int = None, email: str = None)-> str:
+        'Удаляет данные о клиенте из БД'
+        with self.connect.cursor() as cur:
+
+            flag_id = self.check_absence(id = id)
+            flag_email = self.check_absence(email = email)
 
             if flag_id and flag_email:
                 return 'Ошибка! Такого id или емейла нет в базе'   
 
             elif email and id == None:                
                 cur.execute("""
-                SELECT id FROM client 
-                WHERE email = %s;                
+                SELECT id 
+                  FROM client 
+                 WHERE email = %s;                
                 """, (email, ))
                 id = cur.fetchone()
 
-            for key, value in data.items():
-                if value != None:
-                    cur.execute("""
-                    UPDATE client SET %s = %s WHERE id=%s;
-                    """, (key, value, id))
+            cur.execute("""
+            DELETE FROM phone_num 
+             WHERE client_id=%s;
+            """, (id, ))
+
+            cur.execute("""
+            DELETE FROM client 
+             WHERE id=%s;
+            """, (id, ))
 
             self.connect.commit()                 
-            return f'Данные изменены'     
+            return 'Данные о клиенте удалены'     
+      
 
-
-
-    # Удалить номер телефона
-    def del_phone_num(self ):
-        with self.connect.cursor() as cur:                    
+    def find_client(self, id: int = None, first_name: str = None, 
+                   last_name: str = None, email: str = None, 
+                      number: int = None) -> str:
+        'Находит клиента по его данным'
+        with self.connect.cursor() as cur: 
             cur.execute("""
-            CREATE TABLE IF NOT EXISTS name=%s(
-                id SERIAL PRIMARY KEY             
-            """, (name,))
-            conn.commit()
+            SELECT client.id, first_name, last_name, email, number 
+              FROM client
+              FULL JOIN phone_num 
+                ON client.id = phone_num.client_id
+             WHERE client.id = %s 
+                OR first_name = %s 
+                OR last_name = %s 
+                OR email = %s 
+                OR number = %s;
+            """, (id, first_name, last_name, email, number))
 
+            data = cur.fetchall()
 
-    # Удалить клиента из БД
-    def del_client(self ):
-        with self.connect.cursor() as cur:                    
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS name=%s(
-                id SERIAL PRIMARY KEY             
-            """, (name,))
-            conn.commit()            
+            for i in range(len(data)):
+                print({'id': data[i][0], 'first_name': data[i][1], 'last_name': data[i][2], 
+                                        'email': data[i][3], 'number': data[i][4]})
 
-
-    # Найти существующего клиента по его данным
-    def find_client(self ):
-        with self.connect.cursor() as cur:                    
-            cur.execute("""
-            CREATE TABLE IF NOT EXISTS name=%s(
-                id SERIAL PRIMARY KEY             
-            """, (name,))
-            conn.commit()            
-
-
+            return 'Получены все совпадения'
 
    
